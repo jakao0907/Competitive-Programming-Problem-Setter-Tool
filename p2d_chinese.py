@@ -3,10 +3,9 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-
 #/bin/python
 
-import os,math
+import os,math,codecs
 from sys import argv
 import argparse
 from shutil import copyfile,make_archive,rmtree
@@ -20,6 +19,19 @@ def ensure_no_dir(s):
 	if os.path.exists(s):
 		rmtree(s)
 
+def convert_crlf_to_lf(folder_path):
+    print("Converting crlf to lf ...")
+    for root, dirs, files in os.walk(folder_path):
+        for file_name in files:
+            file_path = os.path.join(root, file_name)
+            try:
+                with codecs.open(file_path, 'r', encoding='utf-8', errors='ignore') as file:
+                    content = file.read()
+                content = content.replace('\r\n', '\n')
+                with codecs.open(file_path, 'w', encoding='utf-8') as file:
+                    file.write(content)
+            except Exception as e:
+                print(e)
 
 PACKAGE_DIR='poly/'
 OUTPUT_PATH='.'
@@ -119,6 +131,9 @@ for test in tests:
 	else:
 		copyfile(PACKAGE_DIR+'/tests/'+test,OUTPUT_DIR+'/data/secret/'+test+'.in')
 		copyfile(PACKAGE_DIR+'/tests/'+test+EXTENSION_FOR_OUTPUT,OUTPUT_DIR+'/data/secret/'+test+'.ans')
+
+convert_crlf_to_lf(OUTPUT_DIR+'/data/sample/')
+convert_crlf_to_lf(OUTPUT_DIR+'/data/secret/')
 
 # jury_solutions = filter(lambda x : not x.endswith(EXTENSION_FOR_DESC), os.listdir(PACKAGE_DIR + '/solutions'))
 # for solution in jury_solutions:

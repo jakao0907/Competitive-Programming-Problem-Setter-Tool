@@ -1,10 +1,24 @@
 #/bin/python
-
 import os,math
 from sys import argv
 import argparse
+import codecs
 from shutil import copyfile,make_archive,rmtree
 import xml.etree.ElementTree
+
+def convert_crlf_to_lf(folder_path):
+    print("Converting crlf to lf ...")
+    for root, dirs, files in os.walk(folder_path):
+        for file_name in files:
+            file_path = os.path.join(root, file_name)
+            try:
+                with codecs.open(file_path, 'r', encoding='utf-8', errors='ignore') as file:
+                    content = file.read()
+                content = content.replace('\r\n', '\n')
+                with codecs.open(file_path, 'w', encoding='utf-8') as file:
+                    file.write(content)
+            except Exception as e:
+                print("Error processing " + file_path + e)
 
 def ensure_dir(s):
 	if not os.path.exists(s):
@@ -22,7 +36,7 @@ EXTENSION_FOR_OUTPUT = '.a'
 EXTENSION_FOR_DESC = '.desc'
 sample_tests = ['01']
 PROBCODE = "PROB1"
-#PROBCOLOR = "#000000"
+# PROBCOLOR = "#000000"
 nodelete = False
 
 #PARSING COMMAND LINE ARGUMENTS
@@ -31,7 +45,7 @@ parser.add_argument('package', type=str, help='path of the polygon package')
 parser.add_argument('--code',  type=str, help='problem code for domjudge')
 parser.add_argument('--sample',type=str, help='Specify the filename for sample test. Defaults to \'01\'')
 parser.add_argument('--num-samples', type=str, help='Specify the number of sample test cases. Defaults to \'1\'')
-#parser.add_argument('--color', type=str, help='problem color for domjudge (in RRGGBB format)')
+# parser.add_argument('--color', type=str, help='problem color for domjudge (in RRGGBB format)')
 parser.add_argument('-o','--output', type=str, help='Output Package directory')
 parser.add_argument('--no-delete', action='store_true', help='Don\'t delete the output directory')
 parser.add_argument('--add-html', action='store_true', help='Add Problem statement in HTML form')
@@ -40,8 +54,8 @@ args = parser.parse_args()
 if args.code:
 	PROBCODE = args.code
 
-#if args.color:
-#	PROBCOLOR = '#'+args.color
+# if args.color:
+# 	PROBCOLOR = '#'+args.color
 
 if args.sample:
 	sample_tests = [args.sample]
@@ -101,7 +115,7 @@ desc = open(OUTPUT_DIR+'domjudge-problem.ini','w+')
 desc.write("probid='"+PROBCODE+"'\n")
 desc.write("name='"+problem_name.replace("'","`")+"'\n")
 desc.write("timelimit='"+str(timelimit)+"'\n")
-#desc.write("color='"+PROBCOLOR+"'\n")
+# desc.write("color='"+PROBCOLOR+"'\n")
 desc.close()
 
 tests = filter(lambda x:not x.endswith(EXTENSION_FOR_OUTPUT),os.listdir(PACKAGE_DIR+'/tests'))
@@ -112,6 +126,9 @@ for test in tests:
 	else:
 		copyfile(PACKAGE_DIR+'/tests/'+test,OUTPUT_DIR+'/data/secret/'+test+'.in')
 		copyfile(PACKAGE_DIR+'/tests/'+test+EXTENSION_FOR_OUTPUT,OUTPUT_DIR+'/data/secret/'+test+'.ans')
+
+convert_crlf_to_lf(OUTPUT_DIR+'/data/sample/')
+convert_crlf_to_lf(OUTPUT_DIR+'/data/secret/')
 
 # jury_solutions = filter(lambda x : not x.endswith(EXTENSION_FOR_DESC), os.listdir(PACKAGE_DIR + '/solutions'))
 # for solution in jury_solutions:

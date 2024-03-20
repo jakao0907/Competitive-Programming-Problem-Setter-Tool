@@ -11,7 +11,10 @@ import collections
 import datetime
 import requests
 
-from configs.config import BASE_URL, CONTEST_ID, ADMIN_USERNAME, ADMIN_PASSWORD
+BASE_URL = ''
+CONTEST_ID = 1
+ADMIN_USERNAME = ''
+ADMIN_PASSWORD = ''
 
 contest = requests.get(f'{BASE_URL}/api/contests/{CONTEST_ID}').json()
 teams = requests.get(f'{BASE_URL}/api/contests/{CONTEST_ID}/teams').json()

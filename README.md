@@ -1,4 +1,4 @@
-# Problem-Setter-Tool
+# Competitive programming-Problem-Setter-Tool
 
 ## p2d.py
 convert polygon package to domjudge package

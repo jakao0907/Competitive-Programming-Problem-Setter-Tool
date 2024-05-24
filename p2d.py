@@ -1,5 +1,5 @@
 #/bin/python
-import os,math
+import os,glob,math
 from sys import argv
 import argparse
 import codecs
@@ -57,15 +57,15 @@ if args.code:
 # if args.color:
 # 	PROBCOLOR = '#'+args.color
 
-if args.sample:
-	sample_tests = [args.sample]
+# if args.sample:
+# 	sample_tests = [args.sample]
 
-if args.num_samples:
-    assert len(sample_tests) == 1
-    first = int(sample_tests[0])
-    num_samples = int(args.num_samples)
-    assert(num_samples < 100)
-    sample_tests = ['{0:02d}'.format(i) for i in range(first, first + num_samples)]
+# if args.num_samples:
+#     assert len(sample_tests) == 1
+#     first = int(sample_tests[0])
+#     num_samples = int(args.num_samples)
+#     assert(num_samples < 100)
+#     sample_tests = ['{0:02d}'.format(i) for i in range(first, first + num_samples)]
 
 if args.output:
 	OUTPUT_PATH = args.output
@@ -102,7 +102,7 @@ ensure_dir(OUTPUT_DIR+'/data/sample')
 ensure_dir(OUTPUT_DIR+'/data/secret')
 
 #Create Sub DIRS for jury submissions
-# ensure_dir(OUTPUT_DIR + '/submissions')
+ensure_dir(OUTPUT_DIR + '/submissions')
 
 #Parse XML for Problem Data
 root = xml.etree.ElementTree.parse(PACKAGE_DIR+'problem.xml').getroot()
@@ -111,12 +111,19 @@ timelimit = int(math.ceil(float(root.find('judging').find('testset').find('time-
 
 print(problem_name)
 
+package_name = os.path.splitext(os.path.basename(args.package))[0]
+
 desc = open(OUTPUT_DIR+'domjudge-problem.ini','w+')
 desc.write("probid='"+PROBCODE+"'\n")
-desc.write("name='"+problem_name.replace("'","`")+"'\n")
+desc.write("name='"+package_name.replace("'","`")+"'\n")
 desc.write("timelimit='"+str(timelimit)+"'\n")
 # desc.write("color='"+PROBCOLOR+"'\n")
 desc.close()
+
+#Get Number of sample tests from statements/english
+folder_path = 'poly/statements/english'
+num_samples = len([file for file in os.listdir(folder_path) if file.endswith('.a')])
+sample_tests = ['{0:02d}'.format(i) for i in range(1,num_samples+1)]
 
 tests = filter(lambda x:not x.endswith(EXTENSION_FOR_OUTPUT),os.listdir(PACKAGE_DIR+'/tests'))
 for test in tests:
@@ -130,9 +137,9 @@ for test in tests:
 convert_crlf_to_lf(OUTPUT_DIR+'/data/sample/')
 convert_crlf_to_lf(OUTPUT_DIR+'/data/secret/')
 
-# jury_solutions = filter(lambda x : not x.endswith(EXTENSION_FOR_DESC), os.listdir(PACKAGE_DIR + '/solutions'))
-# for solution in jury_solutions:
-#     copyfile(PACKAGE_DIR + '/solutions/' + solution, OUTPUT_DIR + '/submissions/' + solution)
+jury_solutions = filter(lambda x : not x.endswith(EXTENSION_FOR_DESC), os.listdir(PACKAGE_DIR + '/solutions'))
+for solution in jury_solutions:
+    copyfile(PACKAGE_DIR + '/solutions/' + solution, OUTPUT_DIR + '/submissions/' + solution)
 
 statements = os.listdir(PACKAGE_DIR + '/statements/.pdf/english')
 assert len(statements) == 1 #there should be exactly one english pdf
